@@ -3,3 +3,7 @@
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
+svg{
+  border: 5px solid blue;
+  border-radius: 3px;
+}

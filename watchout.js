@@ -3,11 +3,15 @@
 var options = {
   height: 450,
   width: 700,
-  numEnemies: 10,
-  padding: 20,
+  numEnemies: 20,
+  padding: 5,
   enemyRadius: 10
 };
 
+var scores = {
+  bestScore: 0,
+  currentScore: 0
+};
 // Step 1
 // create the svg
 // then create the data array for enemy positions (to be called later)
@@ -39,6 +43,13 @@ var dragMove = function(){
   var currentData = player.data()[0];
   var newX = currentData.x + xdiff;
   var newY = currentData.y + ydiff;
+  if(newX < 0 || newX > options.width - (options.padding * 2) - parseInt(player.attr("width"))){
+    debugger;
+    newX = currentData.x;
+  }
+  if(newY < 0 || newY > options.height - (options.padding * 2) - parseInt(player.attr("height"))){
+    newY = currentData.y;
+  }
   player.data([{x: newX, y: newY}])
   .attr('x', function(d){ return d.x; })
   .attr('y', function(d){ return d.y; });
@@ -46,6 +57,17 @@ var dragMove = function(){
 var drag = d3.behavior.drag().on('drag', dragMove);
 player.call(drag);
 
+var restartGame = function(){
+  if (scores.bestScore < scores.currentScore){
+    scores.bestScore = scores.currentScore;
+    d3.select(".high span").data([scores.bestScore]).text(function(d){ return d; });
+  }
+  scores.currentScore = 0;
+  updateScore(0);
+};
+
+//Step 4
+//detect when a enemy touches you
 var tweenWithCollisionDetection = function(endData){
   var enemy = d3.select(this);
   // console.log(parseFloat(enemy.attr("cx")));
@@ -60,9 +82,7 @@ var tweenWithCollisionDetection = function(endData){
     var distance = Math.sqrt(Math.pow(currentPlayerX - enemyX, 2) +
       Math.pow(currentPlayerY - enemyY, 2));
     if(distance < 30){
-      // debugger;
-      console.log('game over');
-      return;
+      restartGame();
     }
   };
 };
@@ -116,10 +136,17 @@ setInterval(function(){
 }, 2000);
 
 
-//Step 4
-//detect when a enemy touches you
-
-
 // Step 5
 //Keep track of the user's score, and display it.
+//increase the current score by every 40ms.
+var updateScore = function(scoreData){
+  var currentScore = d3.select('.current span').data([scoreData]);
+  currentScore.text(function(d){return d; });
+};
+
+
+setInterval(function(){
+  scores.currentScore++;
+  updateScore(scores.currentScore);
+}, 40);
 
